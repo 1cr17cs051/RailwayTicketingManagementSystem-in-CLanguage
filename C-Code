@@ -1,0 +1,330 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+int rs;
+typedef struct
+{
+	char name[50];
+	int train_num;
+	int num_of_seats;
+}pd;
+struct user
+{
+	char username[50];
+	char password[50];
+}*pUser;
+pd pass_details;
+//prototypes
+void reservation();
+void viewdetails();
+void cancel();
+void printticket(char name[],int train_num,int num_of_seats,float charge);
+void specifictrain();
+float charge();
+/*void login();*/
+
+//main function
+int main()
+{
+	int menu_choice;
+	printf("\n--------------------------------------------------------------------------------------\n");
+	printf("\n--------------------------------------------------------------------------------------\n");
+	printf("\n\tWelcome to SOUTH-WESTERN RAILWAY TICKET RESERVATION SYSTEM\n");
+	
+	FILE *fp;
+	    char uName[10], pwd[10];int i,flag=0;char c;
+	
+	    pUser=(struct user *)malloc(sizeof(struct user));
+	
+	    printf("1. Login Through An Existing Account\n2. Create New account\n");
+	    scanf("%d",& i);
+	    //system("cls");
+	    switch(i){
+	        case 1:
+	            if ( ( fp=fopen("user.dat", "r+")) == NULL) {
+	                if ( ( fp=fopen("user.dat", "w+")) == NULL) {
+	                    printf ("Could not open file\n");
+	                    exit ( 1);
+	                }
+	            }
+	            printf("Username: ");
+	            scanf("%9s",uName);
+	            printf("Password: ");
+	            scanf("%9s",pwd);
+	            while ( fread (pUser, sizeof(struct user), 1, fp) == 1)
+	            {
+			if( strcmp ( pUser->username, uName) == 0)
+			{
+				flag=1;
+				
+	                    	if( strcmp ( pUser->password, pwd) == 0)
+	                    	{
+	                    		printf("\n--------------------------------------------------------------------------\n");
+	                         	printf ("\nLogged in successfully\n");
+					printf("\n--------------------------------------------------------------------------\n");
+					for(;;)
+					{
+						printf("\t\n\nPlease enter your choice to procced with:\n\n");
+						printf("\t\n1.Reserve a ticket\n\t2.View details of available trains\n\t3.Cancel Reservation\n\t4.check train by train number\n\t5.Exit\n");
+						scanf("%d",&menu_choice);
+						switch(menu_choice)
+						{
+							case 1:reservation();
+								break;
+							case 2:viewdetails();
+								break;
+							case 3:cancel();
+								break;
+							case 4:specifictrain();
+								break;
+							case 5:exit(0);
+							default:printf("Please enter the valid choice\n");
+						}
+			
+					}
+				}
+	                	else
+			    	{
+					printf("\n--------------------------------------------------------------------------\n");
+					printf("\npassword is incorrect\n ");
+					printf("\n--------------------------------------------------------------------------\n");
+			    	}
+	                }
+			
+
+	             }
+			if(flag==0)
+			{
+				printf("\n--------------------------------------------------------------------------\n");
+				printf("invalid username\n");
+				printf("\n--------------------------------------------------------------------------\n");
+			}
+	          		 break;
+	
+	        	case 2:
+	            	do
+	            	{
+	                	if ( ( fp=fopen("user.dat", "a+")) == NULL) {
+	                    	if ( ( fp=fopen("user.dat", "w+")) == NULL) {
+	                        	printf ("Could not open file\n");
+	                        	exit ( 1);
+	                    	}
+	                	}
+	                	printf("Choose A Username: ");
+	                	scanf("%9s",pUser->username);
+	                	printf("Choose A Password: ");
+	                	scanf("%9s",pUser->password);
+	                	fwrite (pUser, sizeof(struct user), 1, fp);
+	                	printf("Add another account? (Y/N):\t");
+	                	scanf(" %c",&c);//skip leading whitespace
+	            	}while(c=='Y'||c=='y');
+	            	break;
+	    	}
+	free ( pUser);//free allocated memory
+	fclose(fp);
+
+}
+//To display the details of available trains
+void viewdetails()
+{
+	printf("\n--------------------------------------------------------------------------------------");
+	printf("\nTrain.No\tName\t\t\tDestination\t\t\tDate\t\tTime\n");
+	printf("1052\t\tSHADAPDHI EXPRESS\tBangalore to Davanagere\t\t20-10-2018\t3:30pm\n");
+	printf("3541\t\tRAJADHANI EXPRESS\tBangalore to Hyderabad\t\t21-10-2018\t9:00pm\n");
+	printf("5218\t\tCHALUKYA EXPRESS\tBangalore to Chikkamagaluru\t21-10-2018\t5:15pm\n");
+	printf("\n--------------------------------------------------------------------------------------\n");
+}
+//Reservation of tickets
+
+void reservation()
+{
+	int confirm;
+	int i=0;
+	float charges;
+	
+	FILE * fp;
+	fp=fopen("seats_reserved.txt","a");
+	
+	printf("\nEnter your name:");
+	scanf("%s",pass_details.name);
+	printf("\nEnter the number of seats:");
+	scanf("%d",&pass_details.num_of_seats);
+	printf("\nsee available trains (Y/N)\n");
+	if(ch=='Y'||ch=='y')
+	{
+		viewdetails();
+	}
+	else
+	{
+		printf("ok you may exit");
+		exit(0);
+	}
+	
+	printf("\n\nPlease enter the train number:\t");
+	scanf("%d",&pass_details.train_num);
+	if(pass_details.train_num==1052)
+	{
+		int dest;
+		printf("Select your destination\n");
+		printf("1.Bangalore to Tumkur\n2.Bangalore to Tiptur\n3.Bangalore to Davanagere\n");
+		scanf("%d",&dest);
+		switch(dest)
+		{
+			case 1:rs=100;break;
+			case 2:rs=210;break;
+			case 3:rs=350;break;
+			case 4:exit(0);
+			default:printf("Enter the valid choice\n");
+			return;
+		}
+		printf("Please confirm your ticket reservation:\n1.Yes\n2.No\n");
+		scanf("%d",&confirm);
+		if(confirm==1)
+		{
+			charges=charge(rs,pass_details.num_of_seats);
+			printticket(pass_details.name,pass_details.train_num,pass_details.num_of_seats,charges);
+		}
+		else
+		{
+			printf("\nPlease try again, your ticket is not reserved\n");
+			return;
+		}
+	}
+	else if(pass_details.train_num==3541)
+	{
+		int dest,confirm;
+		printf("Select your destination\n");
+		printf("1.Bangalore to Gooty\n2.Bangalore to Nellur\n3.Bangalore to Hyderabad\n");
+		scanf("%d",&dest);
+		switch(dest)
+		{
+			case 1:rs=124;break;
+			case 2:rs=235;break;
+			case 3:rs=418;break;
+			case 4:exit(0);
+			default:printf("Enter the valid choice\n");
+			return;
+		}
+		printf("Please confirm your ticket reservation:\n1.Yes\n2.No\n");
+		scanf("%d",&confirm);
+		if(confirm==1)
+		{
+			charges=charge(rs,pass_details.num_of_seats);
+			printticket(pass_details.name,pass_details.train_num,pass_details.num_of_seats,charges);
+		}
+		else
+		{
+			printf("\nPlease try again, your ticket is not reserved\n");
+			return;
+		}
+	}
+	else if(pass_details.train_num==5218)
+	{
+		int dest,confirm;
+		printf("Select your destination\n");
+		printf("1.Bangalore to Tumkur\n2.Bangalore to Arsikere\n3.Bangalore to Chikkamagaluru\n");
+		scanf("%d",&dest);
+		switch(dest)
+		{
+			case 1:rs=138;break;
+			case 2:rs=179;break;
+			case 3:rs=204;break;
+			case 4:exit(0);
+			default:printf("Enter the valid choice\n");
+			return;
+		}
+		printf("Please confirm your ticket reservation:\n1.Yes\n2.No\n");
+		scanf("%d",&confirm);
+		if(confirm==1)
+		{
+			charges=charge(rs,pass_details.num_of_seats);
+			printticket(pass_details.name,pass_details.train_num,pass_details.num_of_seats,charges);
+		}
+		else
+		{
+			printf("\nPlease try again, your ticket is not reserved\n");
+			return;
+		}
+	}
+fclose(fp);
+}
+
+
+float charge(int train_num,int num_of_seats)
+{
+	if(train_num==1052)
+	{
+		rs=rs*num_of_seats;
+		 return(rs);
+	}
+	else if(train_num==3541) 
+	{
+		rs=rs*num_of_seats;
+		return(rs);
+	}
+	else if(train_num==5218) 
+	{
+		rs=rs*num_of_seats;
+		return(rs);
+	}
+}
+
+
+void printticket(char name[],int num_of_seats,int train_num,float charge)
+{
+	printf("\n--------------------------------------------------------------------------\n");
+	printf("\n--------------------------------------------------------------------------\n");
+	printf("\t\t\t\tTICKET\n");
+	printf("\t\t\t\tHAPPY JOURNEY\n");
+	printf("\n\t\t\tName:\t%s",name);
+	printf("\n\t\t\tNumber of seats:  %d",train_num);
+	printf("\n\t\t\tTrain Number:\t%d",num_of_seats);
+	printf("\n\t\t\tCharges:\t%d\n",rs*train_num);
+	printf("---------------------------------------------------------------------------\n");
+	printf("---------------------------------------------------------------------------\n");
+}
+
+void specifictrain(int train_num)
+{
+	printf("Enter the train number:\n");
+	scanf("%d",&train_num);
+	if(train_num==1052)
+	{
+		printf("Train:\t\tSHADAPDHI EXPRESS\n");
+		printf("Destination:\tBangalore to davanager\n");
+		printf("Departure:\t3:30pm\n");
+		printf("\n--------------------------------------------------------------------------\n");
+	}
+	else if(train_num==3541)
+	{
+		printf("\tTrain:\t\tRAJADHANI EXPRESS\n");
+		printf("\tDestination:\t\tBangalore to Hyderabad\n");
+		printf("\tDeparture:\t\t9:00pm\n");
+		printf("\n--------------------------------------------------------------------------\n");
+	}
+	else if(train_num==5218)
+	{
+		printf("\tTrain:\t\tCHALUKYA EXPRESS\n");
+		printf("\tDestination:\t\tBangalore to Chikkamagaluru\n");
+		printf("\tDeparture:\t\t9:00pm\n");
+		printf("\n--------------------------------------------------------------------------\n");
+	}
+}
+void cancel()
+{
+	char ch;
+	/*struct pd *pass_details;	
+	float charges;
+	printticket(pass_details->name,pass_details->num_of_seats,pass_details->train_num,charges);*/
+	printf("Cancel this ticket (Y/N):\t");
+	scanf(" %c",&ch);
+	printf("\n\n");
+	if(ch=='Y'|| ch=='y')
+	{
+		printf("Your ticket is cancelled\n\n\n");
+	}
+	else if(ch=='N'|| ch=='y')
+	{
+		printf("Don't worry your ticket is not cancelled\n\n");
+	}
+}
